@@ -17,7 +17,18 @@ dependencies:
   # Dependencias
   intl: ^0.16.1
 
+  firebase_core: ^0.7.0
+  firebase_auth: ^0.20.1
+  firebase_storage: ^7.0.0
+  firebase_database: ^6.0.0
+  cloud_firestore: ^0.16.0+1
+
+  google_sign_in: ^4.5.9
+
   image_picker: ^0.6.7+22
+
+  bloc_provider:
+    git: https://github.com/fmontalvoo/bloc_provider.git
 
 dev_dependencies:
   flutter_test:
