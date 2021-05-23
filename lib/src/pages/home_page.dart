@@ -1,3 +1,5 @@
+import 'package:bloc_provider/bloc_provider.dart';
+import 'package:fire_chat_app/src/blocs/user_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fire_chat_app/src/models/user.dart';
@@ -5,8 +7,6 @@ import 'package:fire_chat_app/src/models/user.dart';
 import 'package:fire_chat_app/src/widgets/user_card.dart';
 
 import 'package:fire_chat_app/src/utils/app_colors.dart';
-
-import '../../main.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -26,12 +26,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-  }
-
-  Future<Null> handleSignOut() async {
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => MyApp()),
-        (Route<dynamic> route) => false);
+    super.dispose();
   }
 
   @override
@@ -70,7 +65,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     Icons.exit_to_app,
                     color: Colors.white,
                   ),
-                  onPressed: handleSignOut),
+                  onPressed: MultiBlocProvider.of<UserBloc>(context).logout),
             ],
           ),
           body: TabBarView(

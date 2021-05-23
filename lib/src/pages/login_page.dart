@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:fire_chat_app/src/models/user.dart';
+import 'package:bloc_provider/bloc_provider.dart';
 
-import 'package:fire_chat_app/src/pages/home_page.dart';
+import 'package:fire_chat_app/src/blocs/user_bloc.dart';
 
-class LoginPage extends StatefulWidget {
-  @override
-  LoginPageState createState() => LoginPageState();
-}
-
-class LoginPageState extends State<LoginPage> {
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  goHomePage(User user) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePage(user)));
-  }
-
+class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,22 +12,13 @@ class LoginPageState extends State<LoginPage> {
       children: <Widget>[
         Center(
           child: FlatButton(
-            onPressed: () {
-              goHomePage(null);
-            },
+            onPressed: MultiBlocProvider.of<UserBloc>(context).login,
             child: Text(
               'INICIAR SESION CON GOOGLE',
               style: TextStyle(fontSize: 16.0, color: Colors.white),
             ),
             color: Color(0xffdd4b39),
           ),
-        ),
-
-        // Loading
-        Positioned(
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Container(),
         ),
       ],
     ));
