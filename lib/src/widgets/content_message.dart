@@ -41,7 +41,7 @@ class ContentMessage extends StatelessWidget {
               ))
             : Container(
                 child: Image.asset(
-                'images/${message.content}.png',
+                'lib/assets/images/${message.content}.png',
                 width: 100.0,
                 height: 100.0,
                 fit: BoxFit.cover,

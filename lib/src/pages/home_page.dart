@@ -1,8 +1,14 @@
-import 'package:bloc_provider/bloc_provider.dart';
-import 'package:fire_chat_app/src/blocs/user_bloc.dart';
+import 'dart:async';
+
+import 'package:fire_chat_app/src/repository/data_repository.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bloc_provider/bloc_provider.dart';
+import 'package:firebase_database/firebase_database.dart';
+
 import 'package:fire_chat_app/src/models/user.dart';
+
+import 'package:fire_chat_app/src/blocs/user_bloc.dart';
 
 import 'package:fire_chat_app/src/widgets/user_card.dart';
 
@@ -10,7 +16,8 @@ import 'package:fire_chat_app/src/utils/app_colors.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-  HomePage(this.user);
+  final UserBloc bloc;
+  HomePage(this.user, this.bloc);
   @override
   State createState() => HomePageState();
 }
@@ -18,19 +25,49 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<User> users = List();
 
+  StreamSubscription<Event> onAddedSubs;
+  StreamSubscription<Event> onChangeSubs;
+
   @override
   void initState() {
+    onAddedSubs = DataRepository.userDB.onChildAdded.listen(onEntryAdded);
+    onChangeSubs = DataRepository.userDB.onChildChanged.listen(onEntryChanged);
+    updateOnline(true);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
+  onEntryAdded(Event event) async {
+    User newUser = User.fromJson(event.snapshot.value.cast<String, dynamic>())
+      ..id = event.snapshot.key;
+    if (mounted)
+      setState(() {
+        users.add(newUser);
+      });
+  }
+
+  onEntryChanged(Event event) async {
+    User oldEntry = users.singleWhere((entry) {
+      return entry.id == event.snapshot.key;
+    });
+    User newUser = User.fromJson(event.snapshot.value.cast<String, dynamic>())
+      ..id = event.snapshot.key;
+    if (mounted)
+      setState(() {
+        users[users.indexOf(oldEntry)] = newUser;
+      });
+  }
+
   void dispose() {
+    onAddedSubs?.cancel();
+    onChangeSubs?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.user.id);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -89,8 +126,8 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       shrinkWrap: false,
       itemCount: users.length,
       padding: EdgeInsets.all(10.0),
-      itemBuilder: (BuildContext ctxt, int index) {
-        return buildItem(ctxt, users[index]);
+      itemBuilder: (BuildContext context, int index) {
+        return buildItem(context, users[index]);
       },
     );
   }
@@ -106,13 +143,19 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.resumed:
-        print(true);
+        updateOnline(true);
         break;
       case AppLifecycleState.paused:
-        print(false);
+        updateOnline(false);
         break;
       default:
         break;
     }
+  }
+
+  updateOnline(bool isOnline) {
+    widget.user.isOnline = isOnline;
+    widget.user.lastTime = DateTime.now().microsecondsSinceEpoch.toString();
+    widget.bloc.updateUser(widget.user);
   }
 }

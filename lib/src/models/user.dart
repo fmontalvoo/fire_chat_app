@@ -16,20 +16,20 @@ class User {
   });
 
   User.fromJson(Map<String, dynamic> json) {
-    this.id = json['id'] ?? "";
     this.bio = json['bio'] ?? "";
     this.userName = json['userName'] ?? "";
     this.photoUrl = json['photoUrl'] ?? "";
-    this.isOnline = json['isOnline'] ?? "";
+    this.isOnline = json['isOnline'] ?? false;
     this.lastTime = json['lastTime'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': this.id ?? "",
       'bio': this.bio ?? "",
       'userName': this.userName ?? "",
       'photoUrl': this.photoUrl ?? "",
-      'isOnline': this.isOnline ?? "",
+      'isOnline': this.isOnline ?? true,
       'lastTime': this.lastTime ?? ""
     };
   }

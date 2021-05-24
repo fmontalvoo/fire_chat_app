@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// import 'package:fire_chat_app/src/utils/keys.dart';
+import 'package:fire_chat_app/src/utils/keys.dart';
 
 class StickerGridView extends StatelessWidget {
   final List<String> images = [
@@ -20,7 +20,7 @@ class StickerGridView extends StatelessWidget {
           children: images.map((value) {
             return FlatButton(
               onPressed: () => {
-                // Keys.chatState.currentState.onSendMessage(2, content: value)
+                Keys.chatState.currentState.onSendMessage(2, content: value)
               },
               child: Image.asset(
                 'lib/assets/images/$value.png',

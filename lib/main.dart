@@ -38,6 +38,11 @@ class _MyAppState extends State<MyApp> {
           animation: userBloc,
           builder: (context, _) {
             final user = userBloc.currentUser;
+            final newUser = User(
+                id: user?.uid,
+                userName: user?.displayName,
+                photoUrl: user?.photoURL);
+            if (user != null) userBloc.saveUser(newUser);
 
             return MaterialApp(
               title: 'Fire chat app',
@@ -46,10 +51,7 @@ class _MyAppState extends State<MyApp> {
                 visualDensity: VisualDensity.adaptivePlatformDensity,
               ),
               home: userBloc.isLoggedIn
-                  ? HomePage(User(
-                      id: user.uid,
-                      userName: user.displayName,
-                      photoUrl: user.photoURL))
+                  ? HomePage(newUser, userBloc)
                   : LoginPage(),
             );
           }),

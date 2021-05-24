@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:fire_chat_app/src/utils/keys.dart';
-import 'package:image_picker/image_picker.dart';
 
 class ChatTextField extends StatefulWidget {
   ChatTextField();
@@ -22,6 +23,7 @@ class ChatTextFieldState extends State<ChatTextField> {
   @override
   void initState() {
     focusNode.addListener(onFocusChange);
+    super.initState();
   }
 
   onFocusChange() {
@@ -36,15 +38,15 @@ class ChatTextFieldState extends State<ChatTextField> {
       child: Row(
         children: <Widget>[
           // Button send image
-          TextFieldButton(getImage, Icons.image),
-          TextFieldButton(getSticker, Icons.face),
+          textFieldButton(getImage, Icons.image),
+          textFieldButton(getSticker, Icons.face),
 
           // Edit text
           Flexible(
             child: Container(
               child: TextField(
                 onSubmitted: (value) {
-                  // Keys.chatState.currentState.onSendMessage(0);
+                  Keys.chatState.currentState.onSendMessage(0);
                 },
                 style: TextStyle(fontSize: 15.0),
                 controller: Keys.chatState.currentState.textEditingController,
@@ -58,10 +60,8 @@ class ChatTextFieldState extends State<ChatTextField> {
           ),
 
           // Button send message
-          TextFieldButton(
-            () => {
-              // Keys.chatState.currentState.onSendMessage(0)
-            },
+          textFieldButton(
+            () => {Keys.chatState.currentState.onSendMessage(0)},
             Icons.send,
           ),
         ],
@@ -74,7 +74,20 @@ class ChatTextFieldState extends State<ChatTextField> {
     );
   }
 
-  TextFieldButton(var onPressed, IconData icon) {
+  Future uploadFile() async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    var reference = FirebaseStorage.instance.ref().child("chat/$fileName");
+    var uploadTask = reference.putFile(imageFile);
+    var storageTaskSnapshot = await uploadTask;
+    storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
+      imageUrl = downloadUrl;
+      setState(() {
+        Keys.chatState.currentState.onSendMessage(1, content: imageUrl);
+      });
+    });
+  }
+
+  Widget textFieldButton(var onPressed, IconData icon) {
     return FlatButton(
       minWidth: 10,
       onPressed: onPressed,
@@ -83,13 +96,11 @@ class ChatTextFieldState extends State<ChatTextField> {
   }
 
   Future getImage() async {
-    PickedFile pickedFile = await ImagePicker().getImage(
-        source: ImageSource.gallery);
+    PickedFile pickedFile =
+        await ImagePicker().getImage(source: ImageSource.gallery);
     if (pickedFile != null) imageFile = File(pickedFile.path);
 
-    if (imageFile != null) {
-      // uploadFile();
-    }
+    if (imageFile != null) uploadFile();
   }
 
   getSticker() {
